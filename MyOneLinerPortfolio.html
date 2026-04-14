@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Xedene Estipular</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;400;500;600&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080b0f;
+      --surface: #0d1117;
+      --border: #1c2630;
+      --green: #00ff88;
+      --cyan: #00e5ff;
+      --text: #c9d1d9;
+      --muted: #586069;
+      --glow: 0 0 18px rgba(0,255,136,.25);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,.015) 2px, rgba(0,255,136,.015) 4px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(8,11,15,.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      color: var(--green);
+      letter-spacing: .06em;
+      z-index: 201;
+    }
+    .nav-logo span { color: var(--muted); }
+
+    /* Desktop links */
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--green); }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+      z-index: 201;
+    }
+    .hamburger span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--green);
+      border-radius: 2px;
+      transition: all .3s ease;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile drawer */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(8,11,15,.97);
+      z-index: 199;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+    }
+    .mobile-menu.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .mobile-menu a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .mobile-menu a:hover { color: var(--green); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 48px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 80% at 40% 50%, black 30%, transparent 100%);
+    }
+    .hero-inner { max-width: 860px; position: relative; z-index: 1; }
+    .hero-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--green);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .hero-tag::before {
+      content: ''; display: inline-block;
+      width: 28px; height: 1px;
+      background: var(--green);
+    }
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(44px, 8.5vw, 98px);
+      font-weight: 800;
+      line-height: .94;
+      letter-spacing: -.03em;
+      color: #e6edf3;
+      margin-bottom: 30px;
+    }
+    h1 .accent { color: var(--green); }
+    .hero-desc {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 500px;
+      margin-bottom: 46px;
+      line-height: 1.8;
+    }
+    .hero-desc strong { color: var(--text); font-weight: 500; }
+    .btn-row { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 13px 28px;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all .2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: var(--green); color: #080b0f; }
+    .btn-primary:hover { background: #fff; box-shadow: var(--glow); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--green);
+      border: 1px solid rgba(0,255,136,.3);
+    }
+    .btn-ghost:hover {
+      border-color: var(--green);
+      background: rgba(0,255,136,.06);
+    }
+
+    /* ── TERMINAL ── */
+    .terminal {
+      position: absolute; right: 48px; top: 50%;
+      transform: translateY(-50%);
+      width: 370px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(0,255,136,.05);
+      display: none;
+    }
+    @media(min-width: 1080px){ .terminal { display: block; } }
+    .term-bar {
+      background: #161b22;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 7px;
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .term-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0 auto;
+    }
+    .term-body {
+      padding: 18px 20px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      line-height: 1.9;
+    }
+    .term-line { display: flex; gap: 8px; }
+    .prompt { color: var(--green); }
+    .cmd { color: var(--cyan); }
+    .out { color: var(--muted); padding-left: 16px; }
+    .out.w { color: var(--text); }
+    .out.g { color: var(--green); }
+    .cursor-blink {
+      display: inline-block; width: 8px; height: 14px;
+      background: var(--green);
+      vertical-align: middle;
+      animation: blink .9s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* Inline terminal for small screens */
+    .terminal-inline {
+      display: none;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,.6);
+      margin-top: 40px;
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: 100px 48px; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--green);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border);
+    }
+    h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(26px, 4vw, 44px);
+      font-weight: 800;
+      color: #e6edf3;
+      margin-bottom: 48px;
+      letter-spacing: -.025em;
+    }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 52px; align-items: start;
+    }
+    .about-text p { color: var(--muted); margin-bottom: 16px; font-size: 15px; }
+    .about-text p strong { color: var(--text); font-weight: 500; }
+    .info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .info-row .key {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; color: var(--muted); letter-spacing: .08em;
+    }
+    .info-row .val { color: var(--text); }
+    .info-row .val.g { color: var(--green); }
+
+    /* ── SKILLS ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .skill-card {
+      background: var(--surface);
+      padding: 30px;
+      transition: background .2s;
+      position: relative; overflow: hidden;
+    }
+    .skill-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0;
+      width: 2px; height: 0;
+      background: var(--green);
+      transition: height .3s ease;
+    }
+    .skill-card:hover { background: #0f1620; }
+    .skill-card:hover::before { height: 100%; }
+    .skill-num {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; color: var(--green);
+      margin-bottom: 12px; letter-spacing: .12em;
+    }
+    .skill-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px; font-weight: 700;
+      color: #e6edf3; margin-bottom: 9px;
+    }
+    .skill-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    /* ── RECOGNITION ── */
+    .rec-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+    .rec-item {
+      background: var(--surface);
+      padding: 28px 32px;
+      display: grid;
+      grid-template-columns: 60px 1fr auto;
+      gap: 24px; align-items: center;
+      transition: background .2s;
+    }
+    .rec-item:hover { background: #0e1520; }
+    .rec-year {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; color: var(--green);
+      letter-spacing: .08em;
+    }
+    .rec-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px; font-weight: 700;
+      color: #e6edf3; margin-bottom: 5px;
+    }
+    .rec-org {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; color: var(--muted);
+    }
+    .rec-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 5px 12px; border-radius: 2px;
+      white-space: nowrap;
+    }
+    .badge-g { background: rgba(0,255,136,.1); color: var(--green); border: 1px solid rgba(0,255,136,.22); }
+    .badge-c { background: rgba(0,229,255,.07); color: var(--cyan); border: 1px solid rgba(0,229,255,.18); }
+
+    /* ── CONTACT ── */
+    #contact { border-top: 1px solid var(--border); }
+    .contact-inner {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 60px; align-items: start;
+    }
+    .contact-text p { color: var(--muted); font-size: 15px; margin-bottom: 0; margin-top: 12px; }
+    .contact-links { display: flex; flex-direction: column; gap: 10px; margin-top: 48px; }
+    .clink {
+      display: flex; align-items: center; gap: 14px;
+      text-decoration: none;
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      transition: all .2s;
+      background: var(--surface);
+    }
+    .clink:hover {
+      border-color: rgba(0,255,136,.35);
+      background: rgba(0,255,136,.04);
+    }
+    .clink-icon {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px; color: var(--green);
+      width: 22px; text-align: center;
+      flex-shrink: 0;
+    }
+    .clink-label { font-size: 13px; color: var(--text); }
+    .clink-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+      max-width: 100%;
+    }
+    footer p { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); }
+    footer span { color: var(--green); }
+
+    /* ── ANIMATIONS ── */
+    .fade-up {
+      opacity: 0; transform: translateY(22px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .fade-up.visible { opacity: 1; transform: none; }
+    .d1 { transition-delay: .1s; }
+    .d2 { transition-delay: .2s; }
+    .d3 { transition-delay: .3s; }
+    .d4 { transition-delay: .4s; }
+
+    /* ── RESPONSIVE: TABLET (≤ 900px) ── */
+    @media(max-width: 900px) {
+      nav { padding: 16px 32px; }
+      #hero { padding: 110px 32px 70px; }
+      section { padding: 80px 32px; }
+      .about-grid { grid-template-columns: 1fr; gap: 36px; }
+      .contact-inner { grid-template-columns: 1fr; gap: 32px; }
+      .contact-links { margin-top: 0; }
+      footer { padding: 24px 32px; }
+    }
+
+    /* ── RESPONSIVE: MOBILE (≤ 640px) ── */
+    @media(max-width: 640px) {
+      nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: flex; }
+
+      #hero {
+        padding: 90px 20px 60px;
+        min-height: 100svh;
+        align-items: flex-start;
+      }
+      .hero-inner { max-width: 100%; }
+      h1 { font-size: clamp(38px, 11vw, 56px); margin-bottom: 22px; }
+      .hero-desc { font-size: 14px; margin-bottom: 36px; max-width: 100%; }
+      .btn { padding: 12px 22px; font-size: 10px; }
+      .btn-row { gap: 10px; }
+
+      .terminal-inline { display: block; }
+
+      section { padding: 60px 20px; }
+      h2 { margin-bottom: 32px; }
+
+      .skills-grid { grid-template-columns: 1fr; }
+      .skill-card { padding: 22px 20px; }
+
+      .rec-item {
+        grid-template-columns: 48px 1fr;
+        gap: 14px;
+        padding: 20px;
+      }
+      .rec-badge { display: none; }
+      .rec-title { font-size: 15px; }
+      .rec-org { font-size: 10px; }
+
+      .contact-inner { gap: 24px; }
+      .clink { padding: 12px 14px; gap: 12px; }
+      .clink-val { display: none; }
+
+      footer {
+        padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+    }
+
+    /* ── RESPONSIVE: SMALL MOBILE (≤ 380px) ── */
+    @media(max-width: 380px) {
+      h1 { font-size: 34px; }
+      .hero-tag { font-size: 10px; }
+      .btn-row { flex-direction: column; }
+      .btn { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span>~/</span>xedene</div>
+  <ul class="nav-links">
+    <li><a href="#about">about</a></li>
+    <li><a href="#skills">skills</a></li>
+    <li><a href="#recognition">recognition</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU DRAWER -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about" class="mobile-nav-link">about</a>
+  <a href="#skills" class="mobile-nav-link">skills</a>
+  <a href="#recognition" class="mobile-nav-link">recognition</a>
+  <a href="#contact" class="mobile-nav-link">contact</a>
+</div>
+
+<!-- HERO -->
+<section id="hero" style="max-width:100%;">
+  <div class="hero-inner">
+    <div class="hero-tag fade-up">Available for bug bounty &amp; collabs</div>
+    <h1 class="fade-up d1">Xedene<br><span class="accent">Estipular</span></h1>
+    <p class="hero-desc fade-up d2">
+      21 yrs old. Self-taught. <strong>IT enthusiast</strong> doing it for the love of the craft.<br>
+      I find bugs in web applications and keep learning on my own terms.
+    </p>
+    <div class="btn-row fade-up d3">
+      <a href="#recognition" class="btn btn-primary">See my work</a>
+      <a href="#contact" class="btn btn-ghost">Get in touch</a>
+    </div>
+
+    <!-- Terminal shown inline on mobile -->
+    <div class="terminal-inline fade-up d4">
+      <div class="term-bar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <span class="term-title">bash — xedene@local</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="prompt">~$</span>&nbsp;<span class="cmd">whoami</span></div>
+        <div class="out w">xedene estipular</div>
+        <br>
+        <div class="term-line"><span class="prompt">~$</span>&nbsp;<span class="cmd">cat status.txt</span></div>
+        <div class="out g">focus  : web vulnerabilities</div>
+        <div class="out g">status : honing skills daily</div>
+        <br>
+        <div class="term-line"><span class="prompt">~$</span>&nbsp;<span class="cursor-blink"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terminal shown absolutely on desktop -->
+  <div class="terminal fade-up d4">
+    <div class="term-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="term-title">bash — xedene@local</span>
+    </div>
+    <div class="term-body">
+      <div class="term-line"><span class="prompt">~$</span>&nbsp;<span class="cmd">whoami</span></div>
+      <div class="out w">xedene estipular</div>
+      <br>
+      <div class="term-line"><span class="prompt">~$</span>&nbsp;<span class="cmd">cat interests.txt</span></div>
+      <div class="out">web security</div>
+      <div class="out">bug bounty hunting</div>
+      <div class="out">ctf challenges</div>
+      <div class="out">self-directed learning</div>
+      <br>
+      <div class="term-line"><span class="prompt">~$</span>&nbsp;<span class="cmd">cat status.txt</span></div>
+      <div class="out g">focus  : web vulnerabilities</div>
+      <div class="out g">status : honing skills daily</div>
+      <br>
+      <div class="term-line"><span class="prompt">~$</span>&nbsp;<span class="cursor-blink"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-label">01 &mdash; about</div>
+  <h2>Who I am</h2>
+  <div class="about-grid">
+    <div class="about-text fade-up">
+      <p>I'm a 21-year-old IT enthusiast from the Philippines. I do this because I genuinely love it — the challenge of finding what's hidden, understanding how systems break, and getting better every time.</p>
+      <p>I stopped college in 2025 and kept going anyway. Everything I know comes from <strong>hands-on practice</strong>, competitions, and a lot of time deliberately breaking things. I don't wait for a curriculum.</p>
+      <p>In 2024 I competed with Team Trojans at <strong>HACK4Gov Regional (DICT Region 1)</strong> and we took first place out of 12 teams. That same year I reported a valid vulnerability to Michelin through responsible disclosure and made their <strong>Hall of Fame</strong>.</p>
+      <p>Right now I'm focused on web vulnerability research and bug bounty. I look for XSS, IDOR, auth bypasses — the kind of bugs that actually matter in the real world.</p>
+    </div>
+    <div class="fade-up d2">
+      <div class="info-row"><span class="key">age</span><span class="val">21</span></div>
+      <div class="info-row"><span class="key">location</span><span class="val">Philippines</span></div>
+      <div class="info-row"><span class="key">focus</span><span class="val">Web security / Bug bounty</span></div>
+      <div class="info-row"><span class="key">learning path</span><span class="val g">Self-taught</span></div>
+      <div class="info-row"><span class="key">status</span><span class="val g">Open to collabs</span></div>
+      <div class="info-row"><span class="key">email</span><span class="val" style="font-size:12px;">xedene@email.com</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-label">02 &mdash; skills</div>
+  <h2>What I work with</h2>
+  <div class="skills-grid">
+    <div class="skill-card fade-up">
+      <div class="skill-num">// 01</div>
+      <div class="skill-name">Web Vulnerability Research</div>
+      <div class="skill-desc">XSS, IDOR, CSRF, auth bypasses, open redirects. Methodical and patient — I dig until I find something real.</div>
+    </div>
+    <div class="skill-card fade-up d1">
+      <div class="skill-num">// 02</div>
+      <div class="skill-name">Penetration Testing</div>
+      <div class="skill-desc">CTF experience and real-world scope testing. Comfortable in structured competitions and open bug bounty programs.</div>
+    </div>
+    <div class="skill-card fade-up d2">
+      <div class="skill-num">// 03</div>
+      <div class="skill-name">HTML / CSS / JavaScript</div>
+      <div class="skill-desc">Frontend knowledge that helps me understand how web apps are built — and exactly where they go wrong.</div>
+    </div>
+    <div class="skill-card fade-up d3">
+      <div class="skill-num">// 04</div>
+      <div class="skill-name">Recon &amp; OSINT</div>
+      <div class="skill-desc">Mapping attack surfaces before anyone else does. Subdomain enumeration, passive recon, source review.</div>
+    </div>
+    <div class="skill-card fade-up">
+      <div class="skill-num">// 05</div>
+      <div class="skill-name">Responsible Disclosure</div>
+      <div class="skill-desc">Reports that are clear, reproducible, and actually get triaged. I follow VDPs properly and communicate well.</div>
+    </div>
+    <div class="skill-card fade-up d1">
+      <div class="skill-num">// 06</div>
+      <div class="skill-name">Self-Directed Learning</div>
+      <div class="skill-desc">No degree needed. Writeups, labs, competitions, documentation — I learn by doing, constantly.</div>
+    </div>
+  </div>
+</section>
+
+<!-- RECOGNITION -->
+<section id="recognition">
+  <div class="section-label">03 &mdash; recognition</div>
+  <h2>Highlights</h2>
+  <div class="rec-list">
+    <div class="rec-item fade-up">
+      <div class="rec-year">2024</div>
+      <div>
+        <div class="rec-title">Michelin CERT — Hall of Fame</div>
+        <div class="rec-org">cert.michelin.com &mdash; Responsible Vulnerability Disclosure</div>
+      </div>
+      <div class="rec-badge badge-g">Bug Bounty</div>
+    </div>
+    <div class="rec-item fade-up d1">
+      <div class="rec-year">2024</div>
+      <div>
+        <div class="rec-title">HACK4Gov Regional Champion — Region 1</div>
+        <div class="rec-org">DICT Philippines &mdash; Team Trojans, DMMMSU-MLUC &mdash; 1st / 12 teams</div>
+      </div>
+      <div class="rec-badge badge-c">CTF</div>
+    </div>
+    <div class="rec-item fade-up d2">
+      <div class="rec-year">ongoing</div>
+      <div>
+        <div class="rec-title">Independent Bug Bounty Research</div>
+        <div class="rec-org">Various programs &mdash; Focus: web vulnerabilities</div>
+      </div>
+      <div class="rec-badge badge-g">Active</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner">
+    <div class="contact-text">
+      <div class="section-label">04 &mdash; contact</div>
+      <h2>Let's connect</h2>
+      <p>Whether it's a collab, a program invite, or just talking web security — feel free to reach out.</p>
+    </div>
+    <div class="contact-links fade-up d1">
+      <a class="clink" href="mailto:xedene@email.com">
+        <span class="clink-icon">@</span>
+        <span class="clink-label">Email</span>
+        <span class="clink-val">xedene@email.com</span>
+      </a>
+      <a class="clink" href="https://www.linkedin.com/in/xedene-estipular-329624294" target="_blank" rel="noopener">
+        <span class="clink-icon">in</span>
+        <span class="clink-label">LinkedIn</span>
+        <span class="clink-val">xedene-estipular</span>
+      </a>
+      <a class="clink" href="https://cert.michelin.com/hall-of-fame" target="_blank" rel="noopener">
+        <span class="clink-icon">[v]</span>
+        <span class="clink-label">Michelin Hall of Fame</span>
+        <span class="clink-val">2024</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 <span>Xedene Estipular</span></p>
+  <p>Built with HTML, CSS &amp; JS &mdash; no frameworks needed.</p>
+</footer>
+
+<script>
+  // Fade-up observer
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+  // Hamburger / mobile menu
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  function toggleMenu() {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  }
+
+  hamburger.addEventListener('click', toggleMenu);
+
+  // Close menu on link click
+  document.querySelectorAll('.mobile-nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+</script>
+</body>
+</html>
