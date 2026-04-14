@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recon Tool — Xedene Estipular</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;400;500;600&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080b0f;
+      --surface: #0d1117;
+      --surface2: #0f1620;
+      --border: #1c2630;
+      --border2: #243040;
+      --green: #00ff88;
+      --cyan: #00e5ff;
+      --amber: #ffb347;
+      --red: #ff4d4d;
+      --text: #c9d1d9;
+      --muted: #586069;
+      --glow: 0 0 18px rgba(0,255,136,.25);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,.015) 2px, rgba(0,255,136,.015) 4px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(8,11,15,.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px; color: var(--green);
+      letter-spacing: .06em; text-decoration: none;
+    }
+    .nav-logo span { color: var(--muted); }
+    .nav-links { display: flex; gap: 32px; list-style: none; align-items: center; }
+    .nav-links a {
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      color: var(--muted); text-decoration: none;
+      letter-spacing: .1em; text-transform: uppercase; transition: color .2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--green); }
+    .nav-back {
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      color: var(--muted); text-decoration: none;
+      letter-spacing: .1em; text-transform: uppercase;
+      display: flex; align-items: center; gap: 6px; transition: color .2s;
+    }
+    .nav-back:hover { color: var(--green); }
+    .hamburger {
+      display: none; flex-direction: column;
+      gap: 5px; cursor: pointer;
+      background: none; border: none; padding: 4px; z-index: 201;
+    }
+    .hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--green); border-radius: 2px; transition: all .3s ease;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 120px 48px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .page-header::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .section-label {
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      color: var(--green); letter-spacing: .18em; text-transform: uppercase;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
+      position: relative;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 800; color: #e6edf3;
+      letter-spacing: -.03em; margin-bottom: 12px;
+      position: relative;
+    }
+    .page-header h1 .accent { color: var(--green); }
+    .page-header p {
+      font-family: 'Share Tech Mono', monospace; font-size: 12px;
+      color: var(--muted); max-width: 560px; line-height: 1.8;
+      position: relative;
+    }
+
+    /* ── RECON MAIN ── */
+    .recon-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 48px 80px;
+    }
+
+    /* Input bar */
+    .recon-input-wrap {
+      display: flex;
+      gap: 0;
+      margin-bottom: 36px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .recon-input-wrap:focus-within { border-color: rgba(0,255,136,.5); box-shadow: 0 0 0 3px rgba(0,255,136,.07); }
+    .recon-prefix {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px; color: var(--green);
+      background: #0a1018; padding: 0 16px;
+      display: flex; align-items: center;
+      border-right: 1px solid var(--border);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    #reconDomain {
+      flex: 1; background: var(--surface);
+      border: none; outline: none;
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px; padding: 14px 18px;
+    }
+    #reconDomain::placeholder { color: var(--muted); }
+    .recon-run-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+      padding: 0 26px; background: var(--green); color: #080b0f;
+      border: none; cursor: pointer; transition: background .2s; flex-shrink: 0;
+    }
+    .recon-run-btn:hover { background: #fff; }
+    .recon-run-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+    /* Tab switcher */
+    .recon-tabs {
+      display: flex; gap: 1px;
+      background: var(--border); border: 1px solid var(--border);
+      border-radius: 3px; overflow: hidden; margin-bottom: 28px;
+    }
+    .rtab {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+      padding: 11px 20px; background: var(--surface); color: var(--muted);
+      border: none; cursor: pointer; transition: all .15s;
+      display: flex; align-items: center; gap: 8px;
+      flex: 1; justify-content: center;
+    }
+    .rtab:hover { background: var(--surface2); color: var(--text); }
+    .rtab.active { background: #0f1c12; color: var(--green); }
+    .rtab .tab-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background .15s; }
+    .rtab.active .tab-dot { background: var(--green); box-shadow: 0 0 6px rgba(0,255,136,.6); }
+
+    /* Dashboard grid */
+    .recon-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .recon-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 4px; overflow: hidden; transition: border-color .2s;
+    }
+    .recon-panel:hover { border-color: var(--border2); }
+    .panel-header {
+      padding: 13px 18px; background: #0a1018;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-title { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--green); }
+    .panel-status { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); }
+    .panel-body { padding: 18px; min-height: 120px; }
+    .recon-panel.wide { grid-column: 1 / -1; }
+
+    /* Metric rows */
+    .metric-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 0; border-bottom: 1px solid rgba(28,38,48,.6); font-size: 12px;
+    }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-key { font-family: 'Share Tech Mono', monospace; color: var(--muted); font-size: 11px; letter-spacing: .06em; }
+    .metric-val { font-family: 'Share Tech Mono', monospace; color: var(--text); font-size: 11px; text-align: right; max-width: 60%; word-break: break-all; }
+    .metric-val.green { color: var(--green); }
+    .metric-val.red { color: var(--red); }
+    .metric-val.cyan { color: var(--cyan); }
+    .metric-val.amber { color: var(--amber); }
+
+    /* Status chips */
+    .chip { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 3px 9px; border-radius: 2px; }
+    .chip-green { background: rgba(0,255,136,.1); color: var(--green); border: 1px solid rgba(0,255,136,.25); }
+    .chip-red { background: rgba(255,77,77,.1); color: var(--red); border: 1px solid rgba(255,77,77,.2); }
+    .chip-cyan { background: rgba(0,229,255,.07); color: var(--cyan); border: 1px solid rgba(0,229,255,.18); }
+    .chip-amber { background: rgba(255,179,71,.07); color: var(--amber); border: 1px solid rgba(255,179,71,.2); }
+    .chip-muted { background: rgba(88,96,105,.1); color: var(--muted); border: 1px solid rgba(88,96,105,.2); }
+
+    /* Header audit grid */
+    .header-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+    .header-chip {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 3px; font-size: 11px;
+      font-family: 'Share Tech Mono', monospace; border: 1px solid transparent;
+    }
+    .header-chip.ok { background: rgba(0,255,136,.06); border-color: rgba(0,255,136,.15); color: var(--green); }
+    .header-chip.miss { background: rgba(255,77,77,.05); border-color: rgba(255,77,77,.15); color: #ff7070; }
+    .header-chip.miss-med { background: rgba(255,179,71,.05); border-color: rgba(255,179,71,.15); color: var(--amber); }
+    .header-chip .hc-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .header-chip.ok .hc-dot { background: var(--green); }
+    .header-chip.miss .hc-dot { background: var(--red); }
+    .header-chip.miss-med .hc-dot { background: var(--amber); }
+
+    /* Findings */
+    .finding-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid rgba(28,38,48,.6); font-size: 12px;
+    }
+    .finding-item:last-child { border-bottom: none; }
+    .finding-sev {
+      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      letter-spacing: .12em; text-transform: uppercase;
+      padding: 3px 7px; border-radius: 2px; flex-shrink: 0;
+      margin-top: 1px; min-width: 52px; text-align: center;
+    }
+    .sev-high { background: rgba(255,77,77,.12); color: var(--red); border: 1px solid rgba(255,77,77,.2); }
+    .sev-medium { background: rgba(255,179,71,.1); color: var(--amber); border: 1px solid rgba(255,179,71,.2); }
+    .sev-info { background: rgba(0,229,255,.07); color: var(--cyan); border: 1px solid rgba(0,229,255,.15); }
+    .finding-text { flex: 1; }
+    .finding-title { color: var(--text); font-weight: 500; margin-bottom: 2px; }
+    .finding-detail { color: var(--muted); font-size: 11px; font-family: 'Share Tech Mono', monospace; }
+
+    /* Subdomain list */
+    .sub-list { display: flex; flex-direction: column; gap: 4px; max-height: 360px; overflow-y: auto; }
+    .sub-list::-webkit-scrollbar { width: 4px; }
+    .sub-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .sub-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 10px; background: #0a1018;
+      border: 1px solid var(--border); border-radius: 3px;
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    }
+    .sub-name { color: var(--cyan); }
+    .sub-alive { display: flex; align-items: center; gap: 5px; }
+    .alive-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .alive-dot.on { background: var(--green); box-shadow: 0 0 4px var(--green); }
+    .alive-dot.off { background: var(--muted); }
+    .alive-dot.unknown { background: var(--border2); }
+
+    /* Endpoint list */
+    .endpoint-list { display: flex; flex-direction: column; gap: 4px; max-height: 400px; overflow-y: auto; }
+    .endpoint-list::-webkit-scrollbar { width: 4px; }
+    .endpoint-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .ep-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 3px;
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      background: #0a1018; transition: border-color .15s;
+    }
+    .ep-item.interesting { border-color: rgba(0,255,136,.2); background: rgba(0,255,136,.02); }
+    .ep-item.ep-danger { border-color: rgba(255,77,77,.25); background: rgba(255,77,77,.03); }
+    .ep-code { min-width: 36px; text-align: center; padding: 2px 6px; border-radius: 2px; font-size: 10px; }
+    .code-200 { background: rgba(0,255,136,.1); color: var(--green); }
+    .code-301, .code-302 { background: rgba(0,229,255,.08); color: var(--cyan); }
+    .code-401, .code-403 { background: rgba(255,179,71,.08); color: var(--amber); }
+    .code-404 { background: rgba(88,96,105,.1); color: var(--muted); }
+    .code-err { background: rgba(255,77,77,.08); color: var(--red); }
+    .ep-path { color: var(--text); flex: 1; }
+    .ep-flag { font-size: 10px; color: var(--red); }
+
+    /* Raw inspector */
+    .raw-inspector { font-family: 'Share Tech Mono', monospace; font-size: 11px; line-height: 1.8; }
+    .raw-section { margin-bottom: 20px; }
+    .raw-label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .raw-block {
+      background: #070a0e; border: 1px solid var(--border); border-radius: 3px;
+      padding: 14px 16px; overflow-x: auto; max-height: 240px; overflow-y: auto;
+      white-space: pre-wrap; word-break: break-all; color: var(--text);
+    }
+    .raw-block .rk { color: var(--cyan); }
+    .raw-block .rv { color: var(--muted); }
+    .raw-block .rs { color: var(--green); }
+
+    /* Loader */
+    .recon-loader {
+      display: none; align-items: center; gap: 12px;
+      font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted);
+      padding: 16px 0;
+    }
+    .recon-loader.active { display: flex; }
+    .loader-bar { width: 120px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .loader-fill {
+      height: 100%; background: var(--green); border-radius: 2px;
+      animation: scanbar 1.4s ease-in-out infinite;
+    }
+    @keyframes scanbar {
+      0% { width: 0%; margin-left: 0%; }
+      50% { width: 60%; margin-left: 20%; }
+      100% { width: 0%; margin-left: 100%; }
+    }
+
+    /* Idle state */
+    .recon-idle {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 80px 24px; text-align: center;
+      border: 1px dashed var(--border); border-radius: 4px; gap: 12px;
+    }
+    .idle-icon { font-family: 'Share Tech Mono', monospace; font-size: 32px; color: var(--border2); }
+    .idle-text { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); line-height: 1.9; }
+
+    /* IP badges */
+    .ip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ip-badge {
+      font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 4px 10px;
+      background: rgba(0,229,255,.06); color: var(--cyan);
+      border: 1px solid rgba(0,229,255,.15); border-radius: 2px;
+    }
+
+    /* Summary stats bar */
+    .stats-bar {
+      display: flex; gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 3px; overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .stat-cell { flex: 1; background: var(--surface); padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: #e6edf3; }
+    .stat-num.green { color: var(--green); }
+    .stat-num.red { color: var(--red); }
+    .stat-num.cyan { color: var(--cyan); }
+    .stat-num.amber { color: var(--amber); }
+    .stat-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+
+    /* Btn (inline use) */
+    .btn {
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      letter-spacing: .12em; text-transform: uppercase;
+      padding: 10px 20px; border-radius: 2px;
+      text-decoration: none; transition: all .2s; cursor: pointer; border: none;
+    }
+    .btn-ghost { background: transparent; color: var(--green); border: 1px solid rgba(0,255,136,.3); }
+    .btn-ghost:hover { border-color: var(--green); background: rgba(0,255,136,.06); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border); padding: 28px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    footer p { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); }
+    footer span { color: var(--green); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width: 900px) {
+      nav { padding: 16px 32px; }
+      .page-header { padding: 100px 32px 48px; }
+      .recon-main { padding: 0 32px 60px; }
+      .recon-dashboard { grid-template-columns: 1fr; }
+      .recon-panel.wide { grid-column: 1; }
+      footer { padding: 24px 32px; }
+    }
+    @media(max-width: 640px) {
+      nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .page-header { padding: 90px 20px 36px; }
+      .recon-main { padding: 0 20px 48px; }
+      .recon-input-wrap { flex-wrap: wrap; }
+      .recon-prefix { display: none; }
+      .recon-run-btn { width: 100%; padding: 13px; text-align: center; }
+      .rtab { font-size: 9px; padding: 10px 8px; }
+      .stats-bar { flex-wrap: wrap; }
+      .stat-cell { min-width: 50%; }
+      footer { padding: 20px; flex-direction: column; align-items: flex-start; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo"><span>~/</span>xedene</a>
+  <ul class="nav-links">
+    <li><a href="/">portfolio</a></li>
+    <li><a href="/#about">about</a></li>
+    <li><a href="/#skills">skills</a></li>
+    <li><a href="/recon.html" class="active">recon tool</a></li>
+    <li><a href="/#contact">contact</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="section-label">xedene / recon-tool</div>
+  <h1>Target <span class="accent">Profiler</span></h1>
+  <p>
+    Passive recon only — no aggressive scanning.<br>
+    IP resolution · Header audit · Subdomain CT logs · Endpoint probe · Findings report
+  </p>
+</div>
+
+<!-- RECON TOOL -->
+<div class="recon-main">
+
+  <!-- Input -->
+  <div class="recon-input-wrap">
+    <span class="recon-prefix">target://</span>
+    <input type="text" id="reconDomain" placeholder="example.com" autocomplete="off" spellcheck="false" />
+    <button class="recon-run-btn" id="reconRunBtn" onclick="runRecon()">Run Recon</button>
+  </div>
+
+  <!-- Loader -->
+  <div class="recon-loader" id="reconLoader">
+    <div class="loader-bar"><div class="loader-fill"></div></div>
+    <span id="loaderMsg">Scanning target...</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="recon-tabs" id="reconTabs" style="display:none;">
+    <button class="rtab active" onclick="switchTab('profile')" id="tab-profile">
+      <span class="tab-dot"></span> Profile
+    </button>
+    <button class="rtab" onclick="switchTab('headers')" id="tab-headers">
+      <span class="tab-dot"></span> Headers
+    </button>
+    <button class="rtab" onclick="switchTab('subdomains')" id="tab-subdomains">
+      <span class="tab-dot"></span> Subdomains
+    </button>
+    <button class="rtab" onclick="switchTab('endpoints')" id="tab-endpoints">
+      <span class="tab-dot"></span> Endpoints
+    </button>
+    <button class="rtab" onclick="switchTab('findings')" id="tab-findings">
+      <span class="tab-dot"></span> Findings
+    </button>
+    <button class="rtab" onclick="switchTab('raw')" id="tab-raw">
+      <span class="tab-dot"></span> Raw
+    </button>
+  </div>
+
+  <!-- Idle state -->
+  <div class="recon-idle" id="reconIdle">
+    <div class="idle-icon">[ _ ]</div>
+    <div class="idle-text">
+      Enter a domain above and hit Run Recon.<br>
+      Passive recon only — no aggressive scanning.<br>
+      <span style="color:var(--border2);">Uses crt.sh CT logs for subdomain discovery.</span>
+    </div>
+  </div>
+
+  <!-- Dashboard views -->
+  <div id="reconContent" style="display:none;">
+
+    <!-- PROFILE TAB -->
+    <div id="view-profile">
+      <div class="stats-bar" id="statsBar"></div>
+      <div class="recon-dashboard">
+        <div class="recon-panel">
+          <div class="panel-header">
+            <span class="panel-title">// Target Info</span>
+            <span class="panel-status" id="profileTime"></span>
+          </div>
+          <div class="panel-body" id="profilePanel"></div>
+        </div>
+        <div class="recon-panel">
+          <div class="panel-header">
+            <span class="panel-title">// IP Resolution</span>
+          </div>
+          <div class="panel-body" id="ipPanel"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEADERS TAB -->
+    <div id="view-headers" style="display:none;">
+      <div class="recon-dashboard">
+        <div class="recon-panel">
+          <div class="panel-header"><span class="panel-title">// Response Info</span></div>
+          <div class="panel-body" id="responsePanel"></div>
+        </div>
+        <div class="recon-panel">
+          <div class="panel-header"><span class="panel-title">// Server Detection</span></div>
+          <div class="panel-body" id="serverPanel"></div>
+        </div>
+        <div class="recon-panel wide">
+          <div class="panel-header">
+            <span class="panel-title">// Security Header Audit</span>
+            <span class="panel-status" id="headerAuditStatus"></span>
+          </div>
+          <div class="panel-body" id="headerAuditPanel"></div>
+        </div>
+        <div class="recon-panel wide">
+          <div class="panel-header"><span class="panel-title">// All Response Headers</span></div>
+          <div class="panel-body" id="allHeadersPanel"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBDOMAINS TAB -->
+    <div id="view-subdomains" style="display:none;">
+      <div class="recon-dashboard">
+        <div class="recon-panel wide">
+          <div class="panel-header">
+            <span class="panel-title">// Certificate Transparency — Subdomains</span>
+            <span class="panel-status" id="subStatus"></span>
+          </div>
+          <div class="panel-body" id="subdomainPanel">
+            <div style="text-align:center; padding: 24px 0;">
+              <button class="btn btn-ghost" onclick="loadSubdomains()">Load Subdomains</button>
+              <p style="font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--muted); margin-top:12px;">
+                Queries crt.sh certificate transparency logs (passive, no active probing)
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENDPOINTS TAB -->
+    <div id="view-endpoints" style="display:none;">
+      <div class="recon-dashboard">
+        <div class="recon-panel wide">
+          <div class="panel-header">
+            <span class="panel-title">// Common Endpoint Probe</span>
+            <span class="panel-status" id="epStatus"></span>
+          </div>
+          <div class="panel-body" id="endpointPanel">
+            <div style="text-align:center; padding: 24px 0;">
+              <button class="btn btn-ghost" onclick="loadEndpoints()">Probe Endpoints</button>
+              <p style="font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--muted); margin-top:12px;">
+                Checks 20 common paths (admin, api, login, etc.)
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINDINGS TAB -->
+    <div id="view-findings" style="display:none;">
+      <div class="recon-dashboard">
+        <div class="recon-panel wide">
+          <div class="panel-header">
+            <span class="panel-title">// Security Findings</span>
+            <span class="panel-status" id="findingStatus"></span>
+          </div>
+          <div class="panel-body" id="findingsPanel"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RAW TAB -->
+    <div id="view-raw" style="display:none;">
+      <div class="recon-dashboard">
+        <div class="recon-panel wide">
+          <div class="panel-header">
+            <span class="panel-title">// Raw Request / Response Inspector</span>
+          </div>
+          <div class="panel-body">
+            <div class="raw-inspector" id="rawInspector"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /reconContent -->
+</div><!-- /recon-main -->
+
+<footer>
+  <p>&copy; 2026 <span>Xedene Estipular</span></p>
+  <p>Recon Tool &mdash; for educational / portfolio use only</p>
+</footer>
+
+<script>
+  // ── Hamburger ─────────────────────────────────
+  const hamburger = document.getElementById('hamburger');
+  hamburger.addEventListener('click', () => hamburger.classList.toggle('open'));
+
+  // ── Recon State ───────────────────────────────
+  let reconState = {
+    domain: '',
+    profile: null,
+    headers: null,
+    subdomains: null,
+    endpoints: null,
+    activeTab: 'profile',
+  };
+
+  function setLoading(msg) {
+    document.getElementById('reconLoader').classList.add('active');
+    document.getElementById('loaderMsg').textContent = msg || 'Scanning...';
+    document.getElementById('reconRunBtn').disabled = true;
+  }
+  function clearLoading() {
+    document.getElementById('reconLoader').classList.remove('active');
+    document.getElementById('reconRunBtn').disabled = false;
+  }
+
+  function api(endpoint, body) {
+    return fetch('/api/recon/' + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(r => r.json());
+  }
+
+  async function runRecon() {
+    const domain = document.getElementById('reconDomain').value.trim();
+    if (!domain) return;
+
+    reconState = { domain, profile: null, headers: null, subdomains: null, endpoints: null, activeTab: 'profile' };
+
+    document.getElementById('reconIdle').style.display = 'none';
+    document.getElementById('reconContent').style.display = 'none';
+    document.getElementById('reconTabs').style.display = 'none';
+
+    setLoading('Profiling target...');
+    try {
+      reconState.profile = await api('profile', { domain });
+      setLoading('Analyzing HTTP response...');
+      reconState.headers = await api('headers', { domain });
+      renderAll();
+      document.getElementById('reconTabs').style.display = 'flex';
+      document.getElementById('reconContent').style.display = 'block';
+      switchTab('profile');
+    } catch (e) {
+      const idle = document.getElementById('reconIdle');
+      idle.style.display = 'flex';
+      idle.querySelector('.idle-text').textContent = 'Error: ' + (e.message || 'Request failed');
+    }
+    clearLoading();
+  }
+
+  document.getElementById('reconDomain').addEventListener('keydown', e => {
+    if (e.key === 'Enter') runRecon();
+  });
+
+  function switchTab(name) {
+    reconState.activeTab = name;
+    document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    ['profile','headers','subdomains','endpoints','findings','raw'].forEach(v => {
+      const el = document.getElementById('view-' + v);
+      if (el) el.style.display = v === name ? 'block' : 'none';
+    });
+  }
+
+  // ── Render helpers ────────────────────────────
+  function metricRow(key, val, cls = '') {
+    return `<div class="metric-row"><span class="metric-key">${key}</span><span class="metric-val ${cls}">${val}</span></div>`;
+  }
+  function chip(label, type = 'muted') {
+    return `<span class="chip chip-${type}">${label}</span>`;
+  }
+  function statusChipColor(code) {
+    if (code >= 200 && code < 300) return 'green';
+    if (code >= 300 && code < 400) return 'cyan';
+    if (code === 401 || code === 403) return 'amber';
+    if (code >= 400) return 'red';
+    return 'muted';
+  }
+
+  function renderAll() {
+    renderProfile();
+    renderHeaders();
+    renderFindings();
+    renderRaw();
+  }
+
+  function renderProfile() {
+    const p = reconState.profile;
+    if (!p) return;
+
+    const allFindings = [
+      ...(reconState.headers?.findings || []),
+      ...(reconState.endpoints?.findings || []),
+    ];
+    const high = allFindings.filter(f => f.severity === 'high').length;
+    const med  = allFindings.filter(f => f.severity === 'medium').length;
+    const info = allFindings.filter(f => f.severity === 'info').length;
+
+    document.getElementById('statsBar').innerHTML = `
+      <div class="stat-cell">
+        <span class="stat-num ${p.reachable ? 'green' : 'red'}">${p.reachable ? 'LIVE' : 'DOWN'}</span>
+        <span class="stat-label">Reachability</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num cyan">${p.statusCode || '—'}</span>
+        <span class="stat-label">HTTP Status</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num">${p.responseTime ? p.responseTime + 'ms' : '—'}</span>
+        <span class="stat-label">Response Time</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num ${high > 0 ? 'red' : 'green'}">${high}</span>
+        <span class="stat-label">High Findings</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num ${med > 0 ? 'amber' : 'green'}">${med}</span>
+        <span class="stat-label">Medium Findings</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num cyan">${info}</span>
+        <span class="stat-label">Info Findings</span>
+      </div>
+    `;
+
+    document.getElementById('profileTime').textContent = p.responseTime ? p.responseTime + 'ms' : '';
+    document.getElementById('profilePanel').innerHTML = `
+      ${metricRow('domain', p.domain, 'green')}
+      ${metricRow('status', p.reachable ? chip('reachable','green') : chip('unreachable','red'))}
+      ${metricRow('http status', p.statusCode ? chip(p.statusCode, statusChipColor(p.statusCode)) : '—')}
+      ${metricRow('protocol', p.protocol || '—')}
+      ${metricRow('response time', p.responseTime ? p.responseTime + ' ms' : '—', p.responseTime > 1000 ? 'amber' : 'green')}
+      ${metricRow('url', p.url || p.domain)}
+    `;
+
+    const ips = p.ips && p.ips.length > 0
+      ? `<div class="ip-list">${p.ips.map(ip => `<span class="ip-badge">${ip}</span>`).join('')}</div>`
+      : '<span style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:var(--muted);">No IPs resolved</span>';
+
+    document.getElementById('ipPanel').innerHTML = `
+      ${metricRow('resolved', p.ips ? p.ips.length + ' address(es)' : '0')}
+      <div style="margin-top:14px;">${ips}</div>
+    `;
+  }
+
+  function renderHeaders() {
+    const h = reconState.headers;
+    if (!h) return;
+
+    document.getElementById('responsePanel').innerHTML = `
+      ${metricRow('status', h.statusCode ? chip(h.statusCode + ' ' + (h.statusMessage||''), statusChipColor(h.statusCode)) : chip('error','red'))}
+      ${metricRow('content-type', h.headers?.['content-type'] || '—')}
+      ${metricRow('content-length', h.headers?.['content-length'] || '—')}
+      ${metricRow('cache-control', h.headers?.['cache-control'] || '—')}
+      ${metricRow('transfer-encoding', h.headers?.['transfer-encoding'] || '—')}
+      ${metricRow('connection', h.headers?.['connection'] || '—')}
+    `;
+
+    document.getElementById('serverPanel').innerHTML = `
+      ${metricRow('server', h.server ? `<span style="color:var(--amber)">${h.server}</span>` : chip('hidden','green'))}
+      ${metricRow('x-powered-by', h.headers?.['x-powered-by'] ? `<span style="color:var(--amber)">${h.headers['x-powered-by']}</span>` : chip('not exposed','green'))}
+      ${metricRow('via', h.headers?.['via'] || '—')}
+      ${metricRow('x-cache', h.headers?.['x-cache'] || '—')}
+      ${metricRow('cf-ray', h.headers?.['cf-ray'] || '—')}
+    `;
+
+    const audit = h.securityAudit;
+    if (audit) {
+      const total = (audit.present?.length || 0) + (audit.missing?.length || 0);
+      const score = audit.present ? Math.round((audit.present.length / total) * 100) : 0;
+      document.getElementById('headerAuditStatus').textContent = `${audit.present?.length || 0}/${total} — ${score}%`;
+      const chips = [
+        ...(audit.present || []).map(h => `<div class="header-chip ok"><div class="hc-dot"></div>${h.label}</div>`),
+        ...(audit.missing || []).map(h => `<div class="header-chip ${h.critical ? 'miss' : 'miss-med'}"><div class="hc-dot"></div>${h.label}</div>`),
+      ].join('');
+      document.getElementById('headerAuditPanel').innerHTML = `<div class="header-grid">${chips}</div>`;
+    }
+
+    const rawHeaders = h.headers || {};
+    const headerRows = Object.entries(rawHeaders)
+      .map(([k, v]) => `<div><span class="rk">${k}:</span> <span class="rv">${v}</span></div>`)
+      .join('');
+    document.getElementById('allHeadersPanel').innerHTML = `
+      <div class="raw-block">${headerRows || '<span style="color:var(--muted)">No headers returned</span>'}</div>
+    `;
+  }
+
+  function renderFindings() {
+    const allFindings = [
+      ...(reconState.headers?.findings || []),
+      ...(reconState.endpoints?.findings || []),
+    ];
+    document.getElementById('findingStatus').textContent = allFindings.length + ' finding(s)';
+
+    if (allFindings.length === 0) {
+      document.getElementById('findingsPanel').innerHTML = `
+        <div style="padding:24px 0; text-align:center;">
+          <span style="font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--muted);">
+            No findings yet — run endpoint probing for more results.
+          </span>
+        </div>
+      `;
+      return;
+    }
+
+    const order = { high: 0, medium: 1, info: 2 };
+    const sorted = [...allFindings].sort((a, b) => (order[a.severity]||9) - (order[b.severity]||9));
+    document.getElementById('findingsPanel').innerHTML = sorted.map(f => `
+      <div class="finding-item">
+        <span class="finding-sev sev-${f.severity}">${f.severity}</span>
+        <div class="finding-text">
+          <div class="finding-title">${f.title}</div>
+          <div class="finding-detail">${f.detail || ''}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderRaw() {
+    const h = reconState.headers;
+    const p = reconState.profile;
+    if (!h || !p) return;
+
+    const reqLines = [
+      `<span class="rs">GET</span> / HTTP/1.1`,
+      `<span class="rk">Host:</span> <span class="rv">${p.domain}</span>`,
+      `<span class="rk">User-Agent:</span> <span class="rv">Mozilla/5.0 (compatible; xedene-recon/1.0)</span>`,
+      `<span class="rk">Accept:</span> <span class="rv">*/*</span>`,
+    ].join('\n');
+
+    const resLines = h.headers
+      ? Object.entries(h.headers).map(([k,v]) => `<span class="rk">${k}:</span> <span class="rv">${v}</span>`).join('\n')
+      : 'No response headers';
+
+    const body = h.bodyPreview
+      ? h.bodyPreview.replace(/</g,'&lt;').replace(/>/g,'&gt;').slice(0,1000)
+      : '(no body preview)';
+
+    document.getElementById('rawInspector').innerHTML = `
+      <div class="raw-section">
+        <div class="raw-label">Request</div>
+        <div class="raw-block">${reqLines}</div>
+      </div>
+      <div class="raw-section">
+        <div class="raw-label">Response Headers</div>
+        <div class="raw-block"><span class="rs">HTTP/1.1 ${h.statusCode||'?'} ${h.statusMessage||''}</span>\n${resLines}</div>
+      </div>
+      <div class="raw-section">
+        <div class="raw-label">Response Body Preview</div>
+        <div class="raw-block">${body}</div>
+      </div>
+    `;
+  }
+
+  async function loadSubdomains() {
+    const domain = reconState.domain;
+    if (!domain) return;
+    document.getElementById('subdomainPanel').innerHTML = `
+      <div style="text-align:center;padding:24px 0;">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);">Querying crt.sh...</span>
+      </div>
+    `;
+    document.getElementById('subStatus').textContent = 'loading...';
+
+    try {
+      const data = await api('subdomains', { domain, checkLiveness: false });
+      reconState.subdomains = data;
+
+      if (!data.subdomains || data.subdomains.length === 0) {
+        document.getElementById('subdomainPanel').innerHTML = `
+          <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);">
+            No subdomains found in CT logs for ${domain}
+          </span>
+        `;
+        document.getElementById('subStatus').textContent = '0 found';
+        return;
+      }
+
+      document.getElementById('subStatus').textContent = `${data.total} found`;
+      const items = data.subdomains.map(s => `
+        <div class="sub-item">
+          <span class="sub-name">${s.subdomain}</span>
+          <div class="sub-alive">
+            <div class="alive-dot unknown"></div>
+            <span style="font-size:10px;color:var(--muted)">not checked</span>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('subdomainPanel').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);">${data.total} subdomain(s) discovered (passive)</span>
+          <button class="btn btn-ghost" style="font-size:10px;padding:8px 16px;" onclick="checkLiveness()">Check Liveness</button>
+        </div>
+        <div class="sub-list">${items}</div>
+      `;
+    } catch(e) {
+      document.getElementById('subdomainPanel').innerHTML = `
+        <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--red);">Error: ${e.message}</span>
+      `;
+    }
+  }
+
+  async function checkLiveness() {
+    const domain = reconState.domain;
+    document.getElementById('subdomainPanel').querySelector('button')?.remove();
+    document.getElementById('subStatus').textContent = 'checking liveness...';
+    const data = await api('subdomains', { domain, checkLiveness: true });
+    reconState.subdomains = data;
+    document.getElementById('subStatus').textContent = `${data.subdomains.filter(s=>s.alive).length} live / ${data.total} total`;
+    const items = data.subdomains.map(s => `
+      <div class="sub-item">
+        <span class="sub-name">${s.subdomain}</span>
+        <div class="sub-alive">
+          <div class="alive-dot ${s.alive === true ? 'on' : 'off'}"></div>
+          <span style="font-size:10px;color:var(--muted)">${s.alive === true ? 'alive' : s.alive === false ? 'dead' : '?'}</span>
+        </div>
+      </div>
+    `).join('');
+    const list = document.getElementById('subdomainPanel').querySelector('.sub-list');
+    if (list) list.innerHTML = items;
+  }
+
+  async function loadEndpoints() {
+    const domain = reconState.domain;
+    if (!domain) return;
+    document.getElementById('endpointPanel').innerHTML = `
+      <div style="text-align:center;padding:24px 0;">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);">Probing common paths...</span>
+      </div>
+    `;
+    document.getElementById('epStatus').textContent = 'probing...';
+
+    try {
+      const data = await api('endpoints', { domain });
+      reconState.endpoints = data;
+      document.getElementById('epStatus').textContent = `${data.interesting?.length || 0} interesting`;
+      renderFindings();
+
+      const items = (data.paths || []).map(ep => {
+        const code = ep.statusCode;
+        let cls = '', codeCls = 'code-err';
+        if (code === 200) {
+          cls = ep.path.includes('admin') || ep.path.includes('console') ? 'interesting ep-danger' : 'interesting';
+          codeCls = 'code-200';
+        } else if (code === 301 || code === 302) { cls = 'interesting'; codeCls = 'code-' + code; }
+        else if (code === 401 || code === 403) { cls = 'interesting'; codeCls = 'code-401'; }
+        else if (code === 404) { codeCls = 'code-404'; }
+
+        const flag = (code === 200 && (ep.path.includes('admin') || ep.path.includes('panel') || ep.path.includes('console')))
+          ? '<span class="ep-flag">⚠ exposed</span>' : '';
+
+        return `
+          <div class="ep-item ${cls}">
+            <span class="ep-code ${codeCls}">${code || 'ERR'}</span>
+            <span class="ep-path">${ep.path}</span>
+            ${flag}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('endpointPanel').innerHTML = `<div class="endpoint-list">${items}</div>`;
+    } catch(e) {
+      document.getElementById('endpointPanel').innerHTML = `
+        <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--red);">Error: ${e.message}</span>
+      `;
+    }
+  }
+</script>
+</body>
+</html>
