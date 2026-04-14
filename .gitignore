@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+
+# Vercel
+.vercel
+
+# Build / cache (safe to include even if unused)
+dist/
+build/
+coverage/
+
+# OS files
+.DS_Store
