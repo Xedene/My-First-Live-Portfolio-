@@ -1,0 +1,16 @@
+{
+  "name": "xedene-recon",
+  "version": "1.0.0",
+  "description": "Xedene Estipular — Portfolio + Recon Tool",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "node --watch api/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
